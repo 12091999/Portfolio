@@ -1,48 +1,49 @@
 # Portfolio Landing Page
 
-A single-page portfolio with a working contact form backend.
+A responsive portfolio site with a contact form. The frontend is static HTML, CSS, and JavaScript in `public/`; the Express app handles the contact API.
 
-- **Frontend:** plain HTML, CSS, JS (`public/`), responsive with dark mode
-- **Backend:** Node.js + Express (`server.js`)
-- **Storage:** SQLite (`data.db`, created automatically)
-- **Email:** Nodemailer notification on every new message (optional)
-- **Protection:** Helmet security headers, rate limiting (5 messages / 15 min per IP), honeypot spam field, server-side validation
+## Requirements
 
-## Run it
+- Node.js 22.x
+- A Turso database for storing contact messages
+
+## Configure the database
+
+Create a database and auth token in Turso. Set these environment variables locally in `.env` and in the Vercel project's **Settings → Environment Variables**:
+
+```env
+TURSO_DATABASE_URL=libsql://your-database-name-your-username.turso.io
+TURSO_AUTH_TOKEN=your-turso-auth-token
+```
+
+The messages table is created automatically on the first contact form submission. The site can still be deployed without these values, but the contact form will respond that its database is not configured until both values are added.
+
+## Run locally
 
 ```bash
 npm install
-cp .env.example .env     # then edit with your SMTP details
+copy .env.example .env
 npm start
 ```
 
-Open http://localhost:3000
+Then open `http://localhost:3000`. Add the Turso credentials to `.env` to enable message storage. SMTP settings are optional; if configured, Nodemailer sends an email notification after storing a message.
 
-## Email notifications
+## Migrate messages from the old local database
 
-Fill in the `SMTP_*` values in `.env`. For Gmail, enable 2-step verification and create an
-[App Password](https://myaccount.google.com/apppasswords) to use as `SMTP_PASS`.
-If SMTP is not configured, messages are still saved to the database and a warning is logged.
-
-## API
-
-| Method | Path           | Description                          |
-| ------ | -------------- | ------------------------------------ |
-| GET    | `/api/health`  | Health check                         |
-| POST   | `/api/contact` | `{ name, email, subject?, message }` |
-
-## View saved messages
+If your original project has a `data.db` file, keep it in the project folder. After installing dependencies and setting Turso credentials in `.env`, run:
 
 ```bash
-sqlite3 data.db "SELECT id, created_at, name, email, message FROM messages ORDER BY id DESC;"
+npm run migrate:data
 ```
 
-## Customize
+The migration copies only rows in the `messages` table, preserves their IDs, and can be run again safely. Keep the original `data.db` as a backup until you have confirmed the migration.
 
-Replace the placeholder name, copy and project cards in `public/index.html`.
-Colors live in the `:root` variables at the top of `public/style.css`.
+## Deploy to Vercel
 
-## Deploy
+The Express app is exported from `server.js` for Vercel's Express runtime. Static files remain in `public/`, and the package pins Node.js to `22.x` to avoid native SQLite build issues.
 
-Any Node host works (Render, Railway, Fly.io, a VPS). Set the env vars from `.env.example`
-and make sure `data.db` lives on persistent storage (set `DB_PATH`).
+1. Add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to the Vercel project environment variables.
+2. Push the updated project to the GitHub repository connected to Vercel, or deploy with the Vercel CLI.
+3. Confirm the deployment, then visit `/api/health`. A successful response includes `"database":"connected"`.
+
+Optional SMTP variables are listed in `.env.example`. Do not commit `.env` or database files; they are ignored by Git and Vercel.

@@ -1,17 +1,17 @@
 {
   "name": "portfolio-landing",
   "version": "1.0.0",
-  "description": "Personal portfolio landing page with Express backend",
-  "main": "server.js",
+  "description": "Personal portfolio landing page with a Vercel-ready Express API and Turso storage",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node scripts/dev-server.js",
+    "dev": "node --watch scripts/dev-server.js",
+    "migrate:data": "node scripts/migrate-sqlite-to-turso.js"
   },
-"engines": {
-  "node": "22.x"
-},
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
-    "better-sqlite3": "^11.3.0",
+    "@libsql/client": "^0.18.0",
     "dotenv": "^16.6.1",
     "express": "^4.22.3",
     "express-rate-limit": "^7.4.0",

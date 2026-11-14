@@ -4,28 +4,7 @@ const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const nodemailer = require("nodemailer");
-const Database = require("better-sqlite3");
-
-const PORT = process.env.PORT || 3000;
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data.db");
-
-// ---------- Database ----------
-const db = new Database(DB_PATH);
-db.pragma("journal_mode = WAL");
-db.exec(`
-  CREATE TABLE IF NOT EXISTS messages (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT NOT NULL,
-    email      TEXT NOT NULL,
-    subject    TEXT,
-    message    TEXT NOT NULL,
-    ip         TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )
-`);
-const insertMessage = db.prepare(
-  "INSERT INTO messages (name, email, subject, message, ip) VALUES (?, ?, ?, ?, ?)"
-);
+const { ensureSchema, getDatabase } = require("./lib/database");
 
 // ---------- Email (optional) ----------
 let transporter = null;
@@ -34,6 +13,9 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
     secure: Number(process.env.SMTP_PORT) === 465,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 8000,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
 } else {
@@ -88,7 +70,18 @@ const contactLimiter = rateLimit({
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.get("/api/health", async (_req, res) => {
+  try {
+    await getDatabase().execute("SELECT 1");
+    return res.json({ ok: true, database: "connected" });
+  } catch (err) {
+    const notConfigured = err.code === "DATABASE_NOT_CONFIGURED";
+    return res.status(notConfigured ? 503 : 500).json({
+      ok: false,
+      database: notConfigured ? "not_configured" : "unavailable",
+    });
+  }
+});
 
 app.post("/api/contact", contactLimiter, async (req, res) => {
   const { name, email, subject, message, website } = req.body || {};
@@ -112,18 +105,32 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   if (Object.keys(errors).length) return res.status(400).json({ ok: false, errors });
 
   try {
-    insertMessage.run(clean.name, clean.email, clean.subject, clean.message, req.ip);
+    const db = await ensureSchema();
+    await db.execute({
+      sql: "INSERT INTO messages (name, email, subject, message, ip) VALUES (?, ?, ?, ?, ?)",
+      args: [clean.name, clean.email, clean.subject, clean.message, req.ip || null],
+    });
   } catch (err) {
-    console.error("[db]", err);
-    return res.status(500).json({ ok: false, error: "Could not save your message. Please try again." });
+    console.error("[db]", err.message);
+    const notConfigured = err.code === "DATABASE_NOT_CONFIGURED";
+    return res.status(notConfigured ? 503 : 500).json({
+      ok: false,
+      error: notConfigured
+        ? "The message form is not configured yet. Please contact me by email."
+        : "Could not save your message. Please try again.",
+    });
   }
 
   // Email failure should not fail the request; the message is already stored.
-  sendNotification(clean).catch((err) => console.error("[mail]", err.message));
+  try {
+    await sendNotification(clean);
+  } catch (err) {
+    console.error("[mail]", err.message);
+  }
 
-  res.json({ ok: true });
+  return res.json({ ok: true });
 });
 
 app.use("/api", (_req, res) => res.status(404).json({ ok: false, error: "Not found" }));
 
-app.listen(PORT, () => console.log(`Portfolio running at http://localhost:${PORT}`));
+module.exports = app;
