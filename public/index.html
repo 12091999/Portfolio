@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fajar Kurniawan — Frontend & Developer</title>
+  <meta name="description" content="Portfolio of Fajar Kurniawan, a frontend developer and full-stack developer building thoughtful digital products.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="logo" href="#top">fajar<span>.</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+    <nav id="menu">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact" class="btn btn-small">Let's talk</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Frontend developer &amp; full-stack developer</p>
+      <h1>I design and build digital products people actually enjoy using.</h1>
+      <p class="lead">Based in Indonesia, working with startups and teams worldwide. I turn fuzzy ideas into fast, accessible, well-crafted software.</p>
+      <div class="cta">
+        <a href="#work" class="btn">See my work</a>
+        <a href="#contact" class="btn btn-ghost">Get in touch</a>
+      </div>
+      <ul class="stats">
+        <li><strong>8+</strong><span>years experience</span></li>
+        <li><strong>40+</strong><span>projects shipped</span></li>
+        <li><strong>15</strong><span>happy clients</span></li>
+      </ul>
+    </section>
+
+    <section id="work" class="section">
+      <div class="section-head">
+        <p class="eyebrow">Selected work</p>
+        <h2>Recent projects</h2>
+      </div>
+      <div class="grid">
+        <article class="card reveal">
+          <div class="thumb t1"></div>
+          <h3>Ledgerly</h3>
+          <p>Bookkeeping dashboard for freelancers. Cut invoicing time by 60%.</p>
+          <span class="tags">Product design · React · Node</span>
+        </article>
+        <article class="card reveal">
+          <div class="thumb t2"></div>
+          <h3>Trailmate</h3>
+          <p>Offline-first hiking companion app with community route sharing.</p>
+          <span class="tags">Mobile · React Native · Maps</span>
+        </article>
+        <article class="card reveal">
+          <div class="thumb t3"></div>
+          <h3>Fika Coffee</h3>
+          <p>Brand identity and online ordering for a specialty roaster.</p>
+          <span class="tags">Branding · Shopify · UI</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="section about">
+      <div class="section-head">
+        <p class="eyebrow">About</p>
+        <h2>Design thinking, engineering discipline</h2>
+      </div>
+      <div class="about-text">
+        <p>I started as a designer and fell in love with code. Today I work end to end: research, interface design, front-end, and the APIs behind it. That means fewer hand-offs and products that feel coherent.</p>
+        <p>When I'm not working, you'll find me hiking, brewing coffee, or tinkering with side projects.</p>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <div class="section-head">
+        <p class="eyebrow">Toolbox</p>
+        <h2>What I work with</h2>
+      </div>
+      <ul class="chips">
+        <li>UI / UX design</li><li>Figma</li><li>Design systems</li>
+        <li>JavaScript / TypeScript</li><li>React</li><li>Node.js</li>
+        <li>PostgreSQL</li><li>REST APIs</li><li>Accessibility</li>
+      </ul>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="section-head">
+        <p class="eyebrow">Contact</p>
+        <h2>Have a project in mind?</h2>
+        <p class="lead">Send me a message and I'll reply within two business days.</p>
+      </div>
+
+      <form id="contact-form" novalidate>
+        <div class="row">
+          <label>Name
+            <input type="text" name="name" autocomplete="name" required>
+            <small class="error" data-for="name"></small>
+          </label>
+          <label>Email
+            <input type="email" name="email" autocomplete="email" required>
+            <small class="error" data-for="email"></small>
+          </label>
+        </div>
+        <label>Subject <em>(optional)</em>
+          <input type="text" name="subject">
+          <small class="error" data-for="subject"></small>
+        </label>
+        <label>Message
+          <textarea name="message" rows="6" required></textarea>
+          <small class="error" data-for="message"></small>
+        </label>
+        <!-- Honeypot field: hidden from humans -->
+        <div class="hp" aria-hidden="true">
+          <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <button type="submit" class="btn">Send message</button>
+        <p id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> Fajar Kurniawan. Built with care.</p>
+  </footer>
+
+  <script src="/script.js"></script>
+</body>
+</html>
